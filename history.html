@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Trip History — FuelWise AI{% endblock %}
+{% block content %}
+<div class="section-heading history-heading"><div><p class="eyebrow">YOUR SAVED ESTIMATES</p><h1>Trip history</h1><p class="muted">Review past calculations or remove an estimate.</p></div><a class="primary link-button" href="{{ url_for('index') }}">+ New estimate</a></div>
+<section class="panel">
+{% if trips %}
+<div class="table-scroll"><table><thead><tr><th>Route</th><th>Fuel type</th><th>Distance</th><th>Fuel needed</th><th>Estimated cost</th><th>Date</th><th></th></tr></thead><tbody>
+{% for trip in trips %}<tr><td>{{ trip.start_location }} → {{ trip.destination }}</td><td>{{ trip.fuel_type }}</td><td>{{ '%.1f'|format(trip.distance_km * (2 if trip.round_trip else 1)) }} km</td><td>{{ '%.2f'|format(trip.fuel_needed) }} L</td><td class="money">₹{{ '%.2f'|format(trip.estimated_cost) }}</td><td>{{ trip.created_at.strftime('%d %b %Y') }}</td><td><form method="post" action="{{ url_for('delete_trip', trip_id=trip.id) }}" onsubmit="return confirm('Delete this trip estimate?')"><button class="delete" type="submit">Delete</button></form></td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<p class="empty">Your trip history will appear here after your first calculation.</p>{% endif %}
+</section>
+{% endblock %}

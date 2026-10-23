@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}FuelWise AI — Smart Fuel Planner{% endblock %}
+{% block content %}
+<section class="hero">
+  <div><p class="eyebrow">SMART TRAVEL · SIMPLE BUDGETING</p><h1>Plan the journey.<br><span>Know the fuel cost.</span></h1>
+  <p class="hero-copy">Estimate fuel expenses, explore your spending, and get practical trip tips in one place.</p></div>
+  <div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="road"></div><div class="car">🚙</div><div class="pin">📍</div></div>
+</section>
+<section class="stats">
+  <div class="stat"><span>Saved estimates</span><strong>{{ totals.trips }}</strong><small>Trips calculated</small></div>
+  <div class="stat"><span>Distance planned</span><strong>{{ totals.distance }} <small>km</small></strong><small>Across saved trips</small></div>
+  <div class="stat"><span>Estimated spend</span><strong>₹{{ '%.2f'|format(totals.cost) }}</strong><small>All saved estimates</small></div>
+</section>
+<div class="section-heading"><div><p class="eyebrow">TRIP CALCULATOR</p><h2>Your next journey</h2></div><span class="pill">● Ready to calculate</span></div>
+<div class="main-grid">
+  <section class="panel">
+    <form id="trip-form">
+      <div class="field-row">
+        <label>Starting point<input name="start_location" placeholder="e.g. Hyderabad" value="Hyderabad" maxlength="120"></label>
+        <label>Destination<input name="destination" placeholder="e.g. Vijayawada" value="Vijayawada" maxlength="120"></label>
+      </div>
+      <div class="field-row">
+        <label>One-way distance (km)<input name="distance_km" type="number" min="0.1" step="0.1" placeholder="e.g. 275" required></label>
+        <label>Vehicle mileage (km/L)<input name="mileage_kmpl" type="number" min="0.1" step="0.1" placeholder="e.g. 18" required></label>
+      </div>
+      <div class="field-row">
+        <label>Fuel price (₹/L)<input name="fuel_price" type="number" min="0.1" step="0.01" placeholder="e.g. 105" required></label>
+        <label>Fuel type<select name="fuel_type"><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric (manual energy-cost estimate only)</option></select></label>
+      </div>
+      <label class="check"><input type="checkbox" name="round_trip" value="true"> Calculate a round trip (twice the entered distance)</label>
+      <div class="actions"><button class="primary" type="submit">Calculate my trip <span>→</span></button><button class="secondary" type="button" id="voice-input">🎙 Speak details</button></div>
+      <p id="voice-status" class="muted" aria-live="polite">Voice input depends on browser support and microphone permission.</p>
+      <p id="error" class="error" role="alert"></p>
+    </form>
+  </section>
+  <section class="result-panel" id="result-panel">
+    <div class="result-top"><span class="eyebrow">YOUR ESTIMATE</span><span class="result-icon">↗</span></div>
+    <p class="muted">Estimated total fuel cost</p><h2 id="cost-result">₹—</h2>
+    <div class="result-grid">
+      <div><span>Fuel needed</span><strong id="fuel-result">— L</strong></div>
+      <div><span>Total distance</span><strong id="distance-result">— km</strong></div>
+      <div><span>Cost per km</span><strong id="perkm-result">₹—</strong></div>
+    </div>
+    <div class="tip-box"><strong>✨ Smart travel tips</strong><ul id="tips"><li>Calculate a trip to see personalised tips.</li></ul></div>
+    <button class="secondary full" type="button" id="speak-result">🔊 Read my estimate aloud</button>
+  </section>
+</div>
+<section class="panel chart-panel">
+  <div class="section-heading"><div><p class="eyebrow">YOUR DATA</p><h2>Trip analytics</h2></div><span class="muted">Updates as you save estimates</span></div>
+  <div class="charts"><div class="chart-wrap"><h3>Fuel cost by trip</h3><canvas id="cost-chart"></canvas></div><div class="chart-wrap"><h3>Distance by trip</h3><canvas id="distance-chart"></canvas></div></div>
+  <p class="muted">Charts show saved estimates. Create a few trips to see trends.</p>
+</section>
+<section class="panel recent">
+  <div class="section-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Latest estimates</h2></div><a href="{{ url_for('history') }}">View all →</a></div>
+  {% if recent %}
+  <div class="table-scroll"><table><thead><tr><th>Route</th><th>Distance</th><th>Fuel</th><th>Estimated cost</th></tr></thead><tbody>
+  {% for trip in recent %}<tr><td>{{ trip.start_location }} → {{ trip.destination }}</td><td>{{ '%.1f'|format(trip.distance_km * (2 if trip.round_trip else 1)) }} km</td><td>{{ '%.2f'|format(trip.fuel_needed) }} L</td><td class="money">₹{{ '%.2f'|format(trip.estimated_cost) }}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<p class="empty">No trips yet. Enter your first journey above to begin.</p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script>window.FUELWISE_PAGE = "dashboard";</script>{% endblock %}
